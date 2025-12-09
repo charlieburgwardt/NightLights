@@ -277,11 +277,19 @@ PRO psgReprojectGLTtoStandardSpatialRef, $
     tempURI = IDLcfGetTemporaryFile()
     fname_cloud_reproj = filepath(root=file_dirname(tempURI), 'CLOUD_'+file_basename(tempURI))
     
-    oCloudMaskRaster = ENVIRaster( cloud_geo, URI=fname_cloud_reproj, $
+    ;========================= Charlie B. 12/5/2025 ============================
+    cloud_status_bits = UINT(cloud_geo) AND 192
+    oCloudMaskRaster = ENVIRaster( cloud_status_bits, URI=fname_cloud_reproj, $
       METADATA=outCloudMeta, SPATIALREF=oSpatialRef)
+    
+;    oCloudMaskRaster = ENVIRaster( cloud_geo, URI=fname_cloud_reproj, $
+;      METADATA=outCloudMeta, SPATIALREF=oSpatialRef)
+    ;===========================================================================
     oCloudMaskRaster.SAVE
     oCloudMaskRaster.Close
     oCloudMaskRaster = ENVIUrlRaster(fname_cloud_reproj)
+    
+    ;print, fname_cloud_reproj
     
   endif
 
