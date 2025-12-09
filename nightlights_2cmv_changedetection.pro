@@ -48,7 +48,7 @@ PRO NightLights_2CMV_ChangeDetection, $
     INPUT_RASTERS = oRasterCollection, $
     INPUT_ROI = input_roi_xml, $
     OUTPUT_REPROJECT_SERIES = reprojSeriesRaster, $  ;return the reprojected band stack
-    OUTPUT_CLOUDMASK_SERIES = oCloudMaskCollection  ;2025Nov10 - this is a RasterSeries CB changed it to a collection from  oCloudMaskSeries
+    OUTPUT_CLOUDMASK_SERIES = oCloudMaskSeries       ;2025Nov10 - this is a RasterSeries
     
   if ~obj_valid(reprojSeriesRaster) then return
   nfiles = reprojSeriesRaster.Count
@@ -141,21 +141,6 @@ PRO NightLights_2CMV_ChangeDetection, $
   task.Execute
   CMVSeriesRaster = task.OUTPUT_RASTERSERIES
   oDataColl.Add, CMVSeriesRaster
-  
-  if n_elements(oCloudMaskCollection) gt 0 then begin
-    ;========================== Charlie B. 12/5/2025 ==========================
-    ;Output file must contain a .series extension - check for this...
-    ;Add "_cld" to file name to designate a cloud mask series
-    output_cloudseries_uri = output_cmvseries.Replace('.series', '_cloud.series')
-    
-    task = ENVITask('BuildRasterSeries')
-    ;task.INPUT_RASTERS = oCloudMaskCollection
-    task.INPUT_RASTERS = oCloudMaskCollection[1:n_elements(oCloudMaskCollection)-1]   ;Omit the first one: Charlie B. 12/5/2025
-    task.OUTPUT_RASTERSERIES_URI = output_cloudseries_uri
-    task.Execute
-    oCloudMaskSeries = task.OUTPUT_RASTERSERIES
-    oDataColl.Add, oCloudMaskSeries
-  endif
 
   return
 END
