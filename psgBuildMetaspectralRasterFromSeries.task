@@ -1,0 +1,26 @@
+{
+    "name": "psgBuildMetaspectralRasterFromSeries",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgBuildMetaspectralRasterFromSeries",
+    "display_name": "RasterSeries to BandStack Raster",
+    "description": "Converts a RasterSeries to Metaspectral Raster",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTERSERIES",
+            "display_name": "Input RasterSeries",
+            "type": "ENVIRASTERSERIES",
+            "direction": "input",
+            "required": true,
+            "description": "Specify an ENVIRasterSeries data reference."
+        },
+        {
+            "name": "OUTPUT_RASTER",
+            "display_name": "Output Metaspectral Raster",
+            "type": "ENVIRASTER",
+            "direction": "output",
+            "required": true,
+            "description": "This is an array of ENVIRasters."
+        }
+     ]
+}

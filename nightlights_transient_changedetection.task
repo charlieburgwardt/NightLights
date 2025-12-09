@@ -1,0 +1,46 @@
+{
+    "name": "NightLights_Transient_ChangeDetection",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "nightlights_transient_changedetection",
+    "display_name": "VIIRS NightLights - Persistent vs Transient",
+    "description": "VIIRS NightLights Transient Map",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_DATASET_FOLDER",
+            "display_name": "Input Directory",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": true,
+            "is_directory": true, 
+            "description": "Specify folder with HDF5 files."
+        },
+        {
+            "name": "INPUT_ROI",
+            "display_name": "Input ROI XML",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "auto_extension": ".xml", 
+            "description": "Specify ENVIROI XML file."
+        },
+        {
+            "name": "OUTPUT_URI",
+            "display_name": "Output Raster URI",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "auto_extension": "series", 
+            "description": "Specify a string with the fully-qualified path and filename for OUTPUT_HEATMAP_SERIES."
+        },
+        {
+            "name": "OUTPUT_HEATMAP_SERIES",
+            "display_name": "NightLight Change Detection Series",
+            "type": "ENVIRASTERSERIES",
+            "direction": "output",
+            "required": true,
+ 			      "uri_param": "OUTPUT_URI",
+            "description": "This is a reference to the output raster of filetype ENVI."
+        }
+     ]
+}

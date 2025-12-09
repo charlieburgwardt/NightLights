@@ -1,0 +1,26 @@
+{
+    "name": "psgBuildNightLightsHeatmapTask",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgBuildNightLightsHeatmapTask",
+    "display_name": "VIIRS NightLights HeatMap",
+    "description": "Creates a change-detection-like classification heatmap using ColorSlice ENVITask",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTERSERIES",
+            "display_name": "Input RasterSeries",
+            "type": "ENVIRASTERSERIES",
+            "direction": "input",
+            "required": true,
+            "description": "Specify rasterseries containing collection of ImageDifference rasters."
+        },
+        {
+            "name": "OUTPUT_HEATMAP",
+            "display_name": "VIIRS HeatMap Raster Collection",
+            "type": "LIST",
+            "direction": "output",
+            "required": false,
+            "description": "This is a LIST with array of ENVIRasters for HeatMap classification datasets."
+        }
+     ]
+}

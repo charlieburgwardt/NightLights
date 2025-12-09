@@ -1,0 +1,59 @@
+{
+    "name": "psgFilterVIIRSNightLightsTask",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgFilterVIIRSNightLightsTask",
+    "display_name": "Filter VIIRS NightLights Data",
+    "description": "Removes dark or low-light pixels to help with clutter/noise",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTER",
+            "display_name": "Input Raster to apply threshold",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": true,
+            "description": "Specify the raster on which to perform dark lights filter."
+        },
+        {
+            "name": "INPUT_CLOUDMASK",
+            "display_name": "Input CloudMask Raster",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": false,
+            "description": "Specify cloud mask dataset to include as additional filter."
+        },
+        {
+            "name": "THRESHOLD",
+            "display_name": "Dark Pixel Threshold",
+            "type": "FLOAT",
+            "direction": "input",
+            "required": false,
+            "description": "Specify threshold where pixels BELOW specified value are set to 0."
+        },
+        {
+            "name": "CLOUD_THRESH",
+            "display_name": "CloudMask Threshold",
+            "type": "FLOAT",
+            "direction": "input",
+            "required": false,
+            "description": "If INPUT_CLOUDMASK present, specify a filter where pixels ABOVE specified value are set to 0."
+        },
+        {
+            "name": "OUTPUT_URI",
+            "display_name": "Output Raster URI",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "description": "Specify a string with the fully-qualified filename and path of the associated OUTPUT_RASTER."
+        },
+        {
+            "name": "OUTPUT_RASTER",
+            "display_name": "Output Raster",
+            "type": "ENVIRASTER",
+            "direction": "output",
+            "required": true,
+ 			      "uri_param": "OUTPUT_URI",
+            "description": "This is a reference to the output raster of filetype ENVI."
+        }
+     ]
+}

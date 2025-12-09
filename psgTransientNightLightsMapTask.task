@@ -1,0 +1,43 @@
+{
+    "name": "psgTransientNightLightsMapTask",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgTransientNightLightsMapTask",
+    "display_name": "VIIRS NightLights - Transient Lights Map",
+    "description": "Builds a change detection classmap depicting Persistent vs Transient NightLights",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTER1",
+            "display_name": "Input Raster1",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": true,
+            "description": "Specify the baseline raster on which to perform Change Detection."
+        },
+        {
+            "name": "INPUT_RASTER2",
+            "display_name": "Input Raster2",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": true,
+            "description": "Specify the secondary raster on which to perform Change Detection."
+        },
+        {
+            "name": "OUTPUT_URI",
+            "display_name": "Output Raster URI",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "description": "Specify a string with the fully-qualified filename and path of the associated OUTPUT_RASTER."
+        },
+        {
+            "name": "OUTPUT_RASTER",
+            "display_name": "Output Classification Map Raster",
+            "type": "ENVIRASTER",
+            "direction": "output",
+            "required": true,
+ 			      "uri_param": "OUTPUT_URI",
+            "description": "This is a reference to the output raster of filetype ENVI."
+        }
+     ]
+}

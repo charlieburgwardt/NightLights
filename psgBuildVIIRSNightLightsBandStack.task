@@ -1,0 +1,54 @@
+{
+    "name": "psgBuildVIIRSNightLightsBandStack",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgBuildVIIRSNightLightsBandStack",
+    "display_name": "Build VIIRS BandStack Raster",
+    "description": "VIIRS NightLights Reproject and BandStack",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTERS",
+            "display_name": "Input Raster Array",
+            "type": "ENVIRASTERARRAY",
+            "direction": "input",
+            "required": true,
+            "dimensions": "[*]",
+            "description": "Specify array of ENVIRasters to process."
+        },
+        {
+            "name": "INPUT_ROI",
+            "display_name": "Input ROI XML",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "auto_extension": "xml", 
+            "description": "Specify ENVIROI XML file to subset data to AOI."
+        },
+        {
+            "name": "OUTPUT_URI",
+            "display_name": "Output RasterSeries URI",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "auto_extension": "series", 
+            "description": "Specify a string with the fully-qualified path and filename for OUTPUT_REPROJECT_SERIES."
+        },
+        {
+            "name": "OUTPUT_REPROJECT_SERIES",
+            "display_name": "Reprojected VIIRS RasterSeries",
+            "type": "ENVIRASTERSERIES",
+            "direction": "output",
+            "required": true,
+ 			      "uri_param": "OUTPUT_URI",
+            "description": "This is a reference to the output raster of filetype ENVI."
+        },
+        {
+            "name": "OUTPUT_CLOUDMASK_SERIES",
+            "display_name": "VIIRS CloudMask RasterSeries",
+            "type": "ENVIRASTERSERIES",
+            "direction": "output",
+            "required": false,
+            "description": "This is a SERIES with array of ENVIRasters for CloudMask datasets."
+        }
+     ]
+}

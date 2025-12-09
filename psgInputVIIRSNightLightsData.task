@@ -1,0 +1,28 @@
+{
+    "name": "psgInputVIIRSNightLightsData",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgInputVIIRSNightLightsData",
+    "display_name": "Input VIIRS NightLights Data",
+    "description": "VIIRS NightLights H5 Data Input",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_DATASET_FOLDER",
+            "display_name": "Input Directory",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": true,
+            "is_directory": true, 
+            "description": "Specify folder with HDF5 files."
+        },
+        {
+            "name": "OUTPUT_RASTERS",
+            "display_name": "Output VIIRS Raster Collection",
+            "type": "ENVIRASTERARRAY",
+            "direction": "output",
+            "required": true,
+            "dimensions": "[*]", 
+            "description": "This is an array of ENVIRasters of VIIRS datasets."
+        }
+     ]
+}
