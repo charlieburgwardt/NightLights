@@ -1,0 +1,46 @@
+; this file calls the list of files to be compiled and builds the 
+; installation  directory
+
+; compile the program
+@compile_script
+
+; if there are compile errors quit
+if (!error_state.code ne 0) then for i=0, n_elements(!error_state.msg)-1 do print, !error_state.msg[i]
+if (!error_state.code ne 0) then return
+
+; resolve all routines
+RESOLVE_ALL, /QUIET, /CONTINUE_ON_ERROR, SKIP_ROUTINES=['envi']
+
+; write save files
+SAVE, /ROUTINES, /COMPRESS, FILENAME = 'viirs_nightlights.sav'
+
+
+rootdir = 'C:\Users\kellie.mcnaron\.idl\envi\'
+geoagent_dir = filepath('geoagent', root=rootdir, subdir=['custom_code6_1'])
+file_mkdir, geoagent_dir
+dnb_usecase = filepath('viirs_nightlights', root=geoagent_dir)
+file_mkdir, dnb_usecase
+file_move, 'viirs_nightlights.sav', dnb_usecase, /overwrite, /allow_same
+
+project_dir = 'C:\Users\kellie.mcnaron\OneDrive - NV5\Projects\GeoAgent_VIIRS_NightLights_UseCase\src'
+alltasks = file_search(project_dir, '*.task', count=ntasks)
+if ntasks gt 0 then file_copy, alltasks, dnb_usecase, /recursive, /overwrite
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Change Detection Executable
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;.full_reset_session
+;
+;project_dir = 'C:\Users\kellie.mcnaron\OneDrive - NV5\Projects\GeoAgent_VIIRS_NightLights_UseCase\src'
+;
+;; compile the program
+;.compile VIIRS_NightLights_UI.pro
+;
+;RESOLVE_ALL, /QUIET, /CONTINUE_ON_ERROR, SKIP_ROUTINES=['envi']
+;SAVE, /ROUTINES, FILENAME = 'VIIRS_NightLights_UI.sav'
+;
+;rootdir = 'C:\Users\kellie.mcnaron\.idl\envi\'
+;write_dir = filepath('geoagent', root=rootDir, subdir=['extensions6_1'])
+;file_mkdir, write_dir
+;file_move, 'VIIRS_NightLights_UI.sav', write_dir, /overwrite, /allow_same
+

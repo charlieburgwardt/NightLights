@@ -1,0 +1,43 @@
+{
+    "name": "psgReprojectGLTtoStandardSpatialRef",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "psgReprojectGLTtoStandardSpatialRef",
+    "display_name": "Reproject GLT to Standard SpatialRef",
+    "description": "Reprojects a raster georeferenced by a GLT to Standard map information",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTER",
+            "display_name": "Input Raster to reproject",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": true,
+            "description": "Specify the raster to perform reprojection."
+        },
+        {
+            "name": "OUTPUT_URI",
+            "display_name": "Output Raster URI",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "description": "Specify a string with the fully-qualified filename and path of the associated OUTPUT_RASTER."
+        },
+        {
+            "name": "OUTPUT_RASTER",
+            "display_name": "Output Raster",
+            "type": "ENVIRASTER",
+            "direction": "output",
+            "required": true,
+ 			      "uri_param": "OUTPUT_URI",
+            "description": "This is a reference to the output raster of filetype ENVI."
+        },
+        {
+            "name": "OUTPUT_CLOUDMASK",
+            "display_name": "Output Reprojected CloudMask",
+            "type": "ENVIRASTER",
+            "direction": "output",
+            "required": false,
+            "description": "If INPUT_RASTER has second band (cloudmask), then return as separate output raster."
+        }
+     ]
+}

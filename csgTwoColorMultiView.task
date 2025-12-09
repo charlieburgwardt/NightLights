@@ -1,0 +1,43 @@
+{
+    "name": "csgTwoColorMultiView",
+    "base_class": "ENVITaskFromProcedure",
+    "routine": "csgTwoColorMultiView",
+    "display_name": "Two-Color MultiView",
+    "description": "Creates a Two-Color MultiView (2CMV) Image",
+    "schema": "envitask_3.2", 
+    "parameters": [
+        {
+            "name": "INPUT_RASTER1",
+            "display_name": "Input Raster1",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": true,
+            "description": "Specify the first raster on which to perform 2CMV."
+        },
+        {
+            "name": "INPUT_RASTER2",
+            "display_name": "Input Raster2",
+            "type": "ENVIRASTER",
+            "direction": "input",
+            "required": true,
+            "description": "Specify the second raster on which to perform 2CMV."
+        },
+        {
+            "name": "OUTPUT_URI",
+            "display_name": "Output Raster URI",
+            "type": "ENVIURI",
+            "direction": "input",
+            "required": false,
+            "description": "Specify a string with the fully-qualified filename and path of the associated OUTPUT_RASTER."
+        },
+        {
+            "name": "OUTPUT_RASTER",
+            "display_name": "Output 2CMV Raster Image",
+            "type": "ENVIRASTER",
+            "direction": "output",
+            "required": true,
+ 			      "uri_param": "OUTPUT_URI",
+            "description": "This is a reference to the output raster of filetype ENVI."
+        }
+     ]
+}

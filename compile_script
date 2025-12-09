@@ -1,0 +1,22 @@
+;
+.run csgTwoColorMultiView.pro
+.run fstk_check_output_filename.pro
+.run psg_maken.pro
+.run psg_ut_setdifference.pro
+.run psg_ut_setintersection.pro
+
+.run psgApplyNightLightsImageDifference.pro
+.run psgBuildMetaspectralRasterFromSeries.pro
+.run psgBuildNightLightsHeatmapTask.pro
+.run psgBuildVIIRSNightLightsBandStack.pro
+.run psgFilterVIIRSNightlightsTask.pro
+.run psgInputVIIRSNightLightsData.pro
+.run psgReprojectGLTtoStandardSpatialref.pro
+.run psgSubsetRasterToAOITask.pro
+.run psgTransientNightLightsMapTask.pro
+
+.run nightlights_2cmv_changedetection.pro
+.run nightlights_heatmap_changedetection.pro
+.run nightlights_transient_changedetection.pro
+
+
