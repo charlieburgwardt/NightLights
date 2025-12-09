@@ -27,7 +27,7 @@ PRO psgBuildVIIRSNightLightsBandStack, $
   INPUT_ROI = input_roi_xml, $
   OUTPUT_URI = output_uri, $                       ;optional, but extension must be ".series" if set
   OUTPUT_REPROJECT_SERIES = reprojSeriesRaster, $  ;return the reprojected band stack
-  OUTPUT_CLOUDMASK_SERIES = oCloudMaskSeries   ;return reprojected cloudmask band stack 
+  OUTPUT_CLOUDMASK_SERIES = oCloudMaskCollection   ;return reprojected cloudmask band stack, was oCloudMaskSeries 
   
   COMPILE_OPT idl2
 
@@ -106,16 +106,6 @@ PRO psgBuildVIIRSNightLightsBandStack, $
   reprojSeriesRaster = task.OUTPUT_RASTERSERIES
   oDataColl.Add, reprojSeriesRaster
 
-  if n_elements(oCloudMaskCollection) gt 0 then begin
-    output_cloudseries_uri = IDLcfGetTemporaryFile(ext='series')
-    
-    task = ENVITask('BuildRasterSeries')
-    task.INPUT_RASTERS = oCloudMaskCollection
-    task.OUTPUT_RASTERSERIES_URI = output_cloudseries_uri
-    task.Execute
-    oCloudMaskSeries = task.OUTPUT_RASTERSERIES
-    oDataColl.Add, oCloudMaskSeries
-  endif
   
   return
 END
