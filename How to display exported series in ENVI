@@ -1,0 +1,43 @@
+Unzip the SeriesForExport zip file
+Start ENVI
+In the Toolbox start Spatiaotemporal Analysis/Build Raster Series using a double click
+In the tool uncheck Order by Time
+Leave Display result checked (or not)
+Click on Add Raster
+Select Add Filename
+Navigate to the unzipped series folder
+There are two series in this folder: one for 2CMV and another for Cloud Mask
+When displayed in ENVI the cloud mask images should be displayed on top of the 2CMV images
+
+Select all the 2CMV files with this prefix: CMV_ENVITemp
+Click on Open
+In the tool create a new filename with "CMV" in the folder of your choice with the ".series" extension
+Click on Save
+Click on OK in the tool
+The 2CMV series will be created and displayed in the ENVI UI
+
+Restart the Spatiaotemporal Analysis/Build Raster Series using a double click
+In the tool uncheck Order by Time
+Leave Display result checked (or not)
+Click on Add Raster
+Select Add Filename
+Navigate to the unzipped series folder
+Select all the cloud files that have this prefix: CLD_ENVITemp
+Click on Open
+In the tool create a new filename in the folder of your choice with the ".series" extension
+Click on Save
+Click on OK in the tool
+The cloud series will be created and displayed in the ENVI UI.
+In the Stretch drop down menu select No Stretch (replacing the default 2% Stretch)
+Set transparency to 75%
+
+In the Series manager tool click on the three bar hamburger symbol
+Select Link to the CMV_ENVITemp series
+Click on the play arrow
+Set speed to your preferred rate
+Zoom out to view the entire dataset
+
+Open the World_Countries shape file as follows:
+Unzip the World Countries zip file
+In ENVI select File/Open
+Navigate to within the unzipped folder and open World_Countries_Generalized.shp
