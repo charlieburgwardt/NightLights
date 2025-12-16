@@ -8,6 +8,7 @@
 
 
 FUNCTION _extract_sds_raster, f, sds_name, data_ignore=ignore
+  COMPILE_OPT IDL2
   t = ENVITask('ExtractRasterFromFile')
   t.INPUT_URI    = f
   t.DATASET_NAME = sds_name
@@ -36,6 +37,10 @@ END
 
 FUNCTION _apply_spatialref, ras, spref, uri_out, data_ignore=ignore
   COMPILE_OPT idl2
+  
+  ;ENVIRaster writes to URI but will not overwrite an existing file
+  FILE_DELETE, uri_out, /ALLOW_NONEXISTENT
+  
   data = ras.GetData()
   meta = ENVIRasterMetadata()
   IF N_ELEMENTS(ignore) GT 0 THEN meta.AddItem, 'data ignore value', ignore

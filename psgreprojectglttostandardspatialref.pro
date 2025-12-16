@@ -123,8 +123,8 @@ function psg_orthogrid, longlat, $
 
   if 0 eq n_elements(gs) then begin
 
-;2025Aug15 (KMB) - instead of building a default GS that's square, 
-;                  determine GS using both X-Track and Along-Scan GSDs.
+    ;2025Aug15 (KMB) - instead of building a default GS that's square,
+    ;                  determine GS using both X-Track and Along-Scan GSDs.
     ; Calculate GS using both x-track GSD and along-scan GSD...
     xtrack_longdiffs = geo[floor(N[1]/2),1:(N[2]-1),0]-geo[floor(N[1]/2),0:(N[2]-2),0]
     xtrack_latdiffs  = geo[floor(N[1]/2),1:(N[2]-1),1]-geo[floor(N[1]/2),0:(N[2]-2),1]
@@ -145,9 +145,9 @@ function psg_orthogrid, longlat, $
   IF n_elements(mask) eq 0 THEN BEGIN
     ; Recalculate Missing Values for Areas Outside Footprint Polygon
     polygon_X   = [REFORM(geo[0:N[1]-1,0,0]), REFORM(geo[N[1]-1,1:N[2]-1,0]), $
-                   REVERSE(REFORM(geo[0:N[1]-2,N[2]-1,0])), REVERSE(REFORM(geo[0,0:N[2]-2,0]))]
+      REVERSE(REFORM(geo[0:N[1]-2,N[2]-1,0])), REVERSE(REFORM(geo[0,0:N[2]-2,0]))]
     polygon_Y   = [REFORM(geo[0:N[1]-1,0,1]), REFORM(geo[N[1]-1,1:N[2]-1,1]), $
-                   REVERSE(REFORM(geo[0:N[1]-2,N[2]-1,1])), REVERSE(REFORM(geo[0,0:N[2]-2,1]))]
+      REVERSE(REFORM(geo[0:N[1]-2,N[2]-1,1])), REVERSE(REFORM(geo[0,0:N[2]-2,1]))]
     polygon_iX  = INTERPOL(LINDGEN(N_ELEMENTS(longvec)), longvec, polygon_X)
     polygon_iY  = INTERPOL(LINDGEN(N_ELEMENTS(latvec)), latvec, polygon_Y)
     footprint   = OBJ_NEW('IDLanROI', polygon_iX, polygon_iY)
@@ -162,7 +162,7 @@ end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;This task reprojects a raster georeferenced by a GLT (Geographic Lookup Table) 
+;This task reprojects a raster georeferenced by a GLT (Geographic Lookup Table)
 ;to standard map information.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 PRO psgReprojectGLTtoStandardSpatialRef, $
@@ -170,67 +170,76 @@ PRO psgReprojectGLTtoStandardSpatialRef, $
   OUTPUT_URI = fname_reproj, $
   OUTPUT_RASTER = oReprojRaster, $
   OUTPUT_CLOUDMASK = oCloudMaskRaster
-  
+
   compile_opt idl2, hidden
-  
+
   if n_elements(oRaster) eq 0 then return
 
-  oGLTSpatialRef = oRaster.SPATIALREF
-  if n_elements(oGLTSpatialRef) eq 0 then return
-  if ~strcmp(obj_class(oGLTSpatialRef), 'ENVIGLTRasterSpatialRef', /fold) then return
+  ;================================= Charlie B. 12/11/2025 ==================================
+  ;Raster collection already reprojected to Standard map reference during mosaicing process in:
+  ;bm_process_by_day.pro
+  ;pick_and_group_by_day.pro
+  ;bm_viirs_dnb_qf_mosaic_from_list.pro
+  ;So we just copy the already reprojected band 0 over to oReprojRaster
+  ;==========================================================================================
 
+
+
+  ;  oGLTSpatialRef = oRaster.SPATIALREF
+  ;  if n_elements(oGLTSpatialRef) eq 0 then return
+  ;  if ~strcmp(obj_class(oGLTSpatialRef), 'ENVIGLTRasterSpatialRef', /fold) then return
+  ;
   IF ~KEYWORD_SET(fname_reproj) THEN BEGIN
     tempURI = IDLcfGetTemporaryFile()
     fname_reproj = filepath(root=file_dirname(tempURI), 'REPROJ_'+file_basename(tempURI))
-  ENDIF
-  ;Ensure output filename is unique and does not already exist...
-  ok = FSTK_Check_Output_Filename( fname_reproj ) 
-
-  rasterDims = [oRaster.NCOLUMNS, oRaster.NROWS]
-  lonRaster = oGLTSpatialRef.XMAP_GRID
-  if (lonRaster.NCOLUMNS ne rasterDims[0]) || (lonRaster.NROWS ne rasterDims[1]) then begin
-    ; ERROR: GLT lat/lon data must be same spatial size as RASTER image...
-    PRINT, 'ERROR: GLT lat/lon data must be same spatial size as RASTER image...'
-    return
-  endif
-
-  lonlat = make_array( rasterDims[0], rasterDims[1], 2, /double )
-  lonlat[*,*,0] = (oGLTSpatialRef.XMAP_GRID).GetData()
-  lonlat[*,*,1] = (oGLTSpatialRef.YMAP_GRID).GetData()
-
-  ;Start with the DNB data...
-  imgData = oRaster.GetData(BAND=0)
-
-  ;Apply orthorectification using custom function - can only handle one band at a time...
-  longvec = 0 & latvec = 0 & help, temporary(longvec), temporary(latvec), output = o
-  image_geo = psg_orthogrid(lonlat, image = imgData, $
-    longvec = longvec, latvec = latvec, missing = -1, error_stat=errstat)
-  if errstat gt 0 then return
-
-  image_geo = reverse(image_geo, 2)  ;reverse the rows to ensure that [0,0] is at top of display...
-
-  ;Build the Standard Map Information for ENVIStandardRasterSpatialRef
-  nx = n_elements(longvec)
-  ny = n_elements(latvec)
-  lonvec = [longvec[0], longvec[nx-1]]
-  latvec = [latvec[0], latvec[ny-1]]
-  xsize = abs(lonvec[1] - lonvec[0]) / nx
-  ysize = abs(latvec[1] - latvec[0]) / ny
-  pixelSize = [xsize,ysize]
-
-  if (lonvec[0] lt 0) then begin
-    tie_point_map = [max(lonvec),max(latvec)]  ;maybe?
-  endif else begin
-    tie_point_map = [min(lonvec),max(latvec)]
-  endelse
-  thisPix = [0L,0L] ;upper-left pixel coord of image...
-  outWKID = 4326
-  oSpatialRef = ENVIStandardRasterSpatialRef( COORD_SYS_CODE=LONG(outWKID), /GEOGCS, $
-    PIXEL_SIZE=pixelSize, ROTATION=0.0, $
-    TIE_POINT_PIXEL=thisPix, TIE_POINT_MAP=tie_point_map )
-
+  ENDIF;  ;Ensure output filename is unique and does not already exist...
+  ok = FSTK_Check_Output_Filename( fname_reproj )
+  ;
+  ;  rasterDims = [oRaster.NCOLUMNS, oRaster.NROWS]
+  ;  lonRaster = oGLTSpatialRef.XMAP_GRID
+  ;  if (lonRaster.NCOLUMNS ne rasterDims[0]) || (lonRaster.NROWS ne rasterDims[1]) then begin
+  ;    ; ERROR: GLT lat/lon data must be same spatial size as RASTER image...
+  ;    PRINT, 'ERROR: GLT lat/lon data must be same spatial size as RASTER image...'
+  ;    return
+  ;  endif
+  ;
+  ;  lonlat = make_array( rasterDims[0], rasterDims[1], 2, /double )
+  ;  lonlat[*,*,0] = (oGLTSpatialRef.XMAP_GRID).GetData()
+  ;  lonlat[*,*,1] = (oGLTSpatialRef.YMAP_GRID).GetData()
+  ;
+  ;  ;Start with the DNB data...
+  ;  imgData = oRaster.GetData(BAND=0)
+  ;
+  ;  ;Apply orthorectification using custom function - can only handle one band at a time...
+  ;  longvec = 0 & latvec = 0 & help, temporary(longvec), temporary(latvec), output = o
+  ;  image_geo = psg_orthogrid(lonlat, image = imgData, $
+  ;    longvec = longvec, latvec = latvec, missing = -1, error_stat=errstat)
+  ;  if errstat gt 0 then return
+  ;
+  ;  image_geo = reverse(image_geo, 2)  ;reverse the rows to ensure that [0,0] is at top of display...
+  ;
+  ;  ;Build the Standard Map Information for ENVIStandardRasterSpatialRef
+  ;  nx = n_elements(longvec)
+  ;  ny = n_elements(latvec)
+  ;  lonvec = [longvec[0], longvec[nx-1]]
+  ;  latvec = [latvec[0], latvec[ny-1]]
+  ;  xsize = abs(lonvec[1] - lonvec[0]) / nx
+  ;  ysize = abs(latvec[1] - latvec[0]) / ny
+  ;  pixelSize = [xsize,ysize]
+  ;
+  ;  if (lonvec[0] lt 0) then begin
+  ;    tie_point_map = [max(lonvec),max(latvec)]  ;maybe?
+  ;  endif else begin
+  ;    tie_point_map = [min(lonvec),max(latvec)]
+  ;  endelse
+  ;  thisPix = [0L,0L] ;upper-left pixel coord of image...
+  ;  outWKID = 4326
+  ;  oSpatialRef = ENVIStandardRasterSpatialRef( COORD_SYS_CODE=LONG(outWKID), /GEOGCS, $
+  ;    PIXEL_SIZE=pixelSize, ROTATION=0.0, $
+  ;    TIE_POINT_PIXEL=thisPix, TIE_POINT_MAP=tie_point_map )
+  ;
   ;Some Metadata information please...
-  ;bname = oRaster.METADATA['BAND NAMES']
+  bname = oRaster.METADATA['BAND NAMES']
   urlName = oRaster.URI
   if n_elements(urlName) gt 0 then begin
     urlName = ENVI_FILE_STRIP(file_basename(urlName), /BACK)
@@ -245,11 +254,16 @@ PRO psgReprojectGLTtoStandardSpatialRef, $
   outMeta.AddItem, 'BAND NAMES', [urlName]
   outMeta.AddItem, 'DESCRIPTION', 'Ortho-Rectified from GLT SpatialRef'
   outMeta.AddItem, 'DATASET NAMES', urlName
+  ;
+  ;  oReprojRaster = ENVIRaster( image_geo, URI=fname_reproj, $
+  ;    METADATA=outMeta, SPATIALREF=oSpatialRef)
 
-  oReprojRaster = ENVIRaster( image_geo, URI=fname_reproj, $
-    METADATA=outMeta, SPATIALREF=oSpatialRef)
+  imgData = oRaster.GetData(BAND=0)   ;oRaster already reprojected, see note above
+  ; Create a new raster of the subsetted data
+  oSpatialRef = oRaster.SPATIALREF
+  oReprojRaster = ENVIRaster(imgData, URI=fname_reproj,  METADATA=outMeta, SPATIALREF=oSpatialRef)
   ;Call to SAVE here closes the raster for writing & converts it to read-only mode.
-  oReprojRaster.SAVE  
+  oReprojRaster.SAVE
   ; BUT (lesson learned here) the meta items DESCRIPTION and DATASET NAMES, while written
   ; out to FNAME_REPROJ are NOT accessible/acknowledged within this oReprojRaster ref.
   ; I need to call ENVIUrlRaster to build a new ENVIRaster reference - STUPID!
@@ -262,35 +276,33 @@ PRO psgReprojectGLTtoStandardSpatialRef, $
   if oRaster.NBANDS eq 2 then begin
 
     imgData = oRaster.GetData(BAND=1)  ;CLOUD MASK
-    longvec = 0 & latvec = 0 & help, temporary(longvec), temporary(latvec), output = o
-    cloud_geo = psg_orthogrid(lonlat, image = imgData, $
-      longvec = longvec, latvec = latvec, missing = -1, error_stat=errstat)
-    if errstat gt 0 then return
+    ;longvec = 0 & latvec = 0 & help, temporary(longvec), temporary(latvec), output = o
+    ;cloud_geo = psg_orthogrid(lonlat, image = imgData, $
+    ;longvec = longvec, latvec = latvec, missing = -1, error_stat=errstat)
+    ;if errstat gt 0 then return
 
-    cloud_geo = reverse(cloud_geo, 2)  ;reverse the rows to ensure that [0,0] is at top of display...
+    ;cloud_geo = reverse(cloud_geo, 2)  ;reverse the rows to ensure that [0,0] is at top of display...
 
     outCloudMeta = ENVIRasterMetadata()
     outCloudMeta.AddItem, 'BAND NAMES', [urlName]
     outCloudMeta.AddItem, 'DESCRIPTION', 'CloudMask Ortho-Rectified from GLT SpatialRef'
     outCloudMeta.AddItem, 'DATASET NAMES', urlName
-    
+
     tempURI = IDLcfGetTemporaryFile()
     fname_cloud_reproj = filepath(root=file_dirname(tempURI), 'CLOUD_'+file_basename(tempURI))
-    
+
     ;========================= Charlie B. 12/5/2025 ============================
-    cloud_status_bits = UINT(cloud_geo) AND 192
+    cloud_status_bits = UINT(imgData) AND 192
     oCloudMaskRaster = ENVIRaster( cloud_status_bits, URI=fname_cloud_reproj, $
       METADATA=outCloudMeta, SPATIALREF=oSpatialRef)
-    
-;    oCloudMaskRaster = ENVIRaster( cloud_geo, URI=fname_cloud_reproj, $
-;      METADATA=outCloudMeta, SPATIALREF=oSpatialRef)
+
+    ;    oCloudMaskRaster = ENVIRaster( cloud_geo, URI=fname_cloud_reproj, $
+    ;      METADATA=outCloudMeta, SPATIALREF=oSpatialRef)
     ;===========================================================================
     oCloudMaskRaster.SAVE
     oCloudMaskRaster.Close
     oCloudMaskRaster = ENVIUrlRaster(fname_cloud_reproj)
-    
-    ;print, fname_cloud_reproj
-    
+
   endif
 
   return

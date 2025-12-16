@@ -21,7 +21,8 @@ FUNCTION Get_AcqYYYYDDD, path
   ;   ^VNP46A1\.A(\d{7})
   ; Capture group 1 = YYYYDDD
   ;pattern = '^VNP46A1\.A(\d{7})'
-  pattern = '^VNP46A1\.A([0-9]{7})'
+  ;pattern = '^VNP46A1\.A([0-9]{7})'
+  pattern = '^VNP46A[1-4]\.A([0-9]{7})'   ; This pattern alows use of VNP46A1/A2/A3/A4 product types
 
   ; Use STREGEX with /SUBEXPR and /EXTRACT to pull the capture(s).
   ; Returns array: [full_match, subexpr_1, subexpr_2, ...]

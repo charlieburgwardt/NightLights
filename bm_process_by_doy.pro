@@ -39,6 +39,10 @@ PRO bm_process_by_doy, root, oRasterCollection, OUTDIR=outdir, VERBOSE=verbose
   FOR j=0, ngroups-1 DO BEGIN
     doy_key = groups[j].key                ; 'YYYYDDD'
     day_dir = FILEPATH('A' + doy_key, ROOT_DIR=outdir)
+    
+    ;Clean out existing data for this day and start fresh
+    ;FILE_DELETE, day_dir, /ALLOW_NONEXISTENT, /NOEXPAND_PATH, /RECURSIVE
+    
     IF ~FILE_TEST(day_dir, /DIRECTORY) THEN FILE_MKDIR, day_dir
 
     arr = groups[j].files.TOARRAY()
