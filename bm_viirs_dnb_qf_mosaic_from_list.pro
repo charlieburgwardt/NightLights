@@ -57,7 +57,8 @@ FUNCTION bm_viirs_dnb_qf_mosaic_from_list, files, out_dir, DOY_KEY=doy_key, USE_
   IF (N_ELEMENTS(files) EQ 0) THEN MESSAGE, 'No input files.'
 
   ; Launch ENVI (headless is fine for batch)
-  e = ENVI(/HEADLESS)  ; ENVI object  ; see ENVI() docs
+  ;e = ENVI(/HEADLESS)  ; ENVI object  ; see ENVI() docs  ;Started envi before calling bm_process_by_doy.pro
+    
   ; https://nv5geospatialsoftware.co.jp/docs/envi.html  [7](https://nv5geospatialsoftware.co.jp/docs/envimetaspectralraster.html)
 
   ; HDF5 dataset names in VNP46A1

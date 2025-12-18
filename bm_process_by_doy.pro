@@ -35,22 +35,41 @@ PRO bm_process_by_doy, root, oRasterCollection, OUTDIR=outdir, VERBOSE=verbose
 
   ; 4) Build mosaics per DOY and collect as ENVIURLRaster
   oRasterCollection = OBJARR(ngroups)
+  ;oRasterCollection = LIST()
 
   FOR j=0, ngroups-1 DO BEGIN
-    doy_key = groups[j].key                ; 'YYYYDDD'
+    doy_key = groups[j].key   ; 'YYYYDDD'
     day_dir = FILEPATH('A' + doy_key, ROOT_DIR=outdir)
-    
-    ;Clean out existing data for this day and start fresh
-    ;FILE_DELETE, day_dir, /ALLOW_NONEXISTENT, /NOEXPAND_PATH, /RECURSIVE
-    
+
+    ; --- Safe cleanup: empty contents without deleting the folder ---
     IF ~FILE_TEST(day_dir, /DIRECTORY) THEN FILE_MKDIR, day_dir
+    children = FILE_SEARCH(day_dir, '*', /NULL)
+    IF N_ELEMENTS(children) GT 0 THEN FILE_DELETE, children, /ALLOW_NONEXISTENT, /QUIET
 
     arr = groups[j].files.TOARRAY()
     IF KEYWORD_SET(verbose) THEN PRINT, 'DOY A' + doy_key + ' -> ', N_ELEMENTS(arr), ' file(s)'
 
     final_uri = bm_viirs_dnb_qf_mosaic_from_list(arr, day_dir, DOY_KEY=doy_key, USE_UNION_GRID=1)
-
-    ; ENVIURLRaster returns an ENVIRaster object opened by URI
     oRasterCollection[j] = ENVIURLRASTER(final_uri)
+    ;oRasterCollection.Add, ENVIURLRASTER(final_uri)
   ENDFOR
+
+
+  ;  FOR j=0, ngroups-1 DO BEGIN
+  ;    doy_key = groups[j].key                ; 'YYYYDDD'
+  ;    day_dir = FILEPATH('A' + doy_key, ROOT_DIR=outdir)
+  ;
+  ;    ;Clean out existing data for this day and start fresh
+  ;    FILE_DELETE, day_dir, /ALLOW_NONEXISTENT, /NOEXPAND_PATH, /RECURSIVE
+  ;
+  ;    IF ~FILE_TEST(day_dir, /DIRECTORY) THEN FILE_MKDIR, day_dir
+  ;
+  ;    arr = groups[j].files.TOARRAY()
+  ;    IF KEYWORD_SET(verbose) THEN PRINT, 'DOY A' + doy_key + ' -> ', N_ELEMENTS(arr), ' file(s)'
+  ;
+  ;    final_uri = bm_viirs_dnb_qf_mosaic_from_list(arr, day_dir, DOY_KEY=doy_key, USE_UNION_GRID=1)
+  ;
+  ;    ; ENVIURLRaster returns an ENVIRaster object opened by URI
+  ;    oRasterCollection[j] = ENVIURLRASTER(final_uri)
+  ;  ENDFOR
 END

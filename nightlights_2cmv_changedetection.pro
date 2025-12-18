@@ -35,12 +35,13 @@ PRO NightLights_2CMV_ChangeDetection, $
   COMPILE_OPT idl2
 
   e = ENVI(/CURRENT)
-  IF ~OBJ_VALID(e) THEN e = ENVI()  ; fall back to launching ENVI
+  IF ~OBJ_VALID(e) THEN e = ENVI()
+
+  ; Build the mosaics (bm)
+  bm_process_by_doy, dataResource, oRasterCollection, OUTDIR=FILEPATH('bm_doy_mosaics', ROOT_DIR=dataResource), VERBOSE=1
+
   oDataColl = e.DATA
   oView = e.GetView()
-
-  ; Build the mosaics
-  bm_process_by_doy, dataResource, oRasterCollection, OUTDIR=FILEPATH('bm_doy_mosaics', ROOT_DIR=dataResource), VERBOSE=1
 
   nfiles = n_elements(oRasterCollection)
   if nfiles eq 0 then return
@@ -120,88 +121,165 @@ PRO NightLights_2CMV_ChangeDetection, $
 
   endfor
 
-  oCloudRaster = oCloudMaskCollection[0]  ; Filter the reference image
-  ;tempURI = IDLcfGetTemporaryFile()
-  ;baseFile = filepath(root=output_folder,'CLD_BASE_'+file_basename(tempURI))
-  ;oCloudRaster.Export, baseFile, 'ENVI'
+  ; Clean out the series folder at this time
+  ; --- Safe cleanup: empty contents without deleting the folder ---
+  IF ~FILE_TEST(output_folder, /DIRECTORY) THEN FILE_MKDIR, day_dir
+  children = FILE_SEARCH(output_folder, '*', /NULL)
+  IF N_ELEMENTS(children) GT 0 THEN FILE_DELETE, children, /ALLOW_NONEXISTENT
 
-  reprojRaster = oDNB_RasterCollection[0]   ; Filter the reference image
-  psgFilterVIIRSNightLightsTask, $
-    INPUT_RASTER = reprojRaster, $     ;specify raster to threshold
-    INPUT_CLOUDMASK = oCloudRaster, $  ;(optional) cloud mask to include as additional filter
-    THRESHOLD = threshValForCollection, $ ;common threshold value for raster collection
-    OUTPUT_RASTER = oFilteredBaseRaster
+  ;=================== Use Valid pixels now ===============================
 
-  ; Move the filtered base file and cloud file to the series folder
-  newFile = file_basename(reprojRaster.URI)
-  newFile = newfile.replace('REPROJ', 'FILTERED_BASE')
-  newFile = filepath(root=output_folder, newFile)
-  oFilteredBaseRaster.Export, newfile, 'ENVI'
-  oFilteredBaseRaster = ENVIURLRaster(newFile)
-  
-  newFile = file_basename(oCloudRaster.URI)
-  newFile = newfile.replace('CLOUD', 'BASE_CLOUD')
-  newFile = filepath(root=output_folder, newFile)
-  oCloudRaster.Export, newfile, 'ENVI'
-  oCloudRaster = ENVIURLRaster(newFile)
+
+  oBaseCloudRaster = oCloudMaskCollection[0]  ; Filter the reference image
+
+
+  ;  reprojRaster = oDNB_RasterCollection[0]   ; Filter the reference image
+  ;  psgFilterVIIRSNightLightsTask, $
+  ;    INPUT_RASTER = reprojRaster, $     ;specify raster to threshold
+  ;    INPUT_CLOUDMASK = oCloudRaster, $  ;(optional) cloud mask to include as additional filter
+  ;    THRESHOLD = threshValForCollection, $ ;common threshold value for raster collection
+  ;    OUTPUT_RASTER = oFilteredBaseRaster
+
+  ; Move the filtered base file and cloud file to the series folder - do this later
+  ;  newFile = file_basename(reprojRaster.URI)
+  ;  newFile = newfile.replace('REPROJ', 'FILTERED_BASE')
+  ;  newFile = filepath(root=output_folder, newFile)
+  ;  oFilteredBaseRaster.Export, newfile, 'ENVI'
+  ;  oFilteredBaseRaster = ENVIURLRaster(newFile)
+  ;
+  ;  newFile = file_basename(oCloudRaster.URI)
+  ;  newFile = newfile.replace('CLOUD', 'BASE_CLOUD')
+  ;  newFile = filepath(root=output_folder, newFile)
+  ;  oCloudRaster.Export, newfile, 'ENVI'
+  ;  oCloudRaster = ENVIURLRaster(newFile)
 
   oCMVRasterCollection = LIST()
   oLocalCldMaskCollection = LIST()
   for rr=1,nfiles-1 do begin
 
-    oCloudRaster = oCloudMaskCollection[rr]  
-    reprojRaster = oDNB_RasterCollection[rr]
+    ;    oCloudRaster = oCloudMaskCollection[rr]
+    ;    reprojRaster = oDNB_RasterCollection[rr]
 
-    psgFilterVIIRSNightLightsTask, $
-      INPUT_RASTER = reprojRaster, $     ;specify raster to threshold
-      INPUT_CLOUDMASK = oCloudRaster, $  ;(optional) cloud mask to include as additional filter
-      THRESHOLD = threshValForCollection, $ ;common threshold value for raster collection
-      OUTPUT_RASTER = oFilteredRaster
+    ;    psgFilterVIIRSNightLightsTask, $
+    ;      INPUT_RASTER = reprojRaster, $     ;specify raster to threshold
+    ;      INPUT_CLOUDMASK = oCloudRaster, $  ;(optional) cloud mask to include as additional filter
+    ;      THRESHOLD = threshValForCollection, $ ;common threshold value for raster collection
+    ;      OUTPUT_RASTER = oFilteredRaster
+    ;
+    ;    ; Move the filtered file and cloud file to the series folder
+    ;    newFile = file_basename(reprojRaster.URI)
+    ;    newFile = newfile.replace('REPROJ', 'FILTERED')
+    ;    newFile = filepath(root=output_folder, newFile)
+    ;        oFilteredRaster.Export, newfile, 'ENVI'
+    ;    oFilteredRaster = ENVIURLRaster(newFile)
+    ;
+    ;    newFile = file_basename(oCloudRaster.URI)
+    ;    newFile = filepath(root=output_folder, newFile)
+    ;    oCloudRaster.Export, newfile, 'ENVI'
+    ;    oCloudRaster = ENVIURLRaster(newFile)
 
-    ; Move the filtered file and cloud file to the series folder
-    newFile = file_basename(reprojRaster.URI)
-    newFile = newfile.replace('REPROJ', 'FILTERED')
-    newFile = filepath(root=output_folder, newFile)
-    oFilteredRaster.Export, newfile, 'ENVI'
-    oFilteredRaster = ENVIURLRaster(newFile)
 
-    newFile = file_basename(oCloudRaster.URI)
-    newFile = filepath(root=output_folder, newFile)
-    oCloudRaster.Export, newfile, 'ENVI'
-    oCloudRaster = ENVIURLRaster(newFile)
-
-    ;fname_2cmv = IDLcfGetTemporaryFile()
-    ;CMV between "baseline" raster and successive days...
+    
+    ; Run CMV
     csgTwoColorMultiView, $
-      INPUT_RASTER1=oFilteredBaseRaster, $
-      INPUT_RASTER2=oFilteredRaster, $
-      ;OUTPUT_URI=fname_2cmv, $
+      INPUT_RASTER1=oDNB_RasterCollection[0], $
+      INPUT_RASTER2=oDNB_RasterCollection[rr], $
       OUTPUT_RASTER=cloudy_CMVRaster
 
-    ;oCMVRasterCollection.Add, cloudy_CMVRaster
-    ;tempURI = IDLcfGetTemporaryFile()
-    
-    cmvFile = file_basename(oFilteredRaster.URI)
-    cmvFile = cmvFile.replace('FILTERED', 'CMV')
+    ; Build invalid mask from cloud rasters
+;    cloudMaskThreshold   = 0  ;Was 64
+;    baseCloudMaskData    = oCloudMaskCollection[0].GetData(BAND=0)
+;    currentCloudMaskData = oCloudMaskCollection[rr].GetData(BAND=0)
+;    invalidMask = (baseCloudMaskData gt float(cloudMaskThreshold)) OR $
+;      (currentCloudMaskData gt float(cloudMaskThreshold))
+
+    ; Gray out invalid pixels in CMV RGB output
+;    cmvData = cloudy_CMVRaster.GetData()   ; [ns, nl, 3]
+;    grayVal = 0B    ; Was 128B
+;    FOR b=0,2 DO BEGIN
+;      band = cmvData[*,*,b]
+;      band[invalidMask] = grayVal
+;      cmvData[*,*,b] = band
+;    ENDFOR
+
+
+rasterDims = [oRaster.NCOLUMNS, oRaster.NROWS]
+outData = fltarr(rasterDims[0], rasterDims[1])
+
+if keyword_set(threshold) then begin
+  threshVal = FLOAT(threshold)
+endif else begin
+  stats = envirasterstatistics(oRaster)
+  threshVal = stats.MEAN + 0.15*stats.STDDEV
+endelse
+;print, threshVal
+
+
+data = oRaster.GetData(BAND=0)   ;one band at a time please...
+ddx = where( data gt threshVal[0], nlights )
+outData[ddx] = data[ddx]
+
+; --- Build cloud union indices as above ---
+cloudMaskThreshold   = 64.0
+baseCloudMaskData    = oCloudMaskCollection[0].GetData(BAND=0)
+currentCloudMaskData = oCloudMaskCollection[rr].GetData(BAND=0)
+
+baseCldIdx    = WHERE(baseCloudMaskData    GT cloudMaskThreshold, nBase)
+currentCldIdx = WHERE(currentCloudMaskData GT cloudMaskThreshold, nCurr)
+IF nBase LE 0 THEN baseCldIdx = LONG([])
+IF nCurr LE 0 THEN currentCldIdx = LONG([])
+
+cloudIdxUnion = UNION(baseCldIdx, currentCldIdx)  ;From Beaumont library
+excludeCloudPixels = cloudIdxUnion
+
+;excludeCloudPixels = psg_ut_setintersection(cloudIdxUnion, ddx, index=removeThese )  ;Try this
+
+; --- Fetch CMV cube and apply gray ---
+cmvData = cloudy_CMVRaster.GetData()  ; [ns, nl, 3], likely FLOAT (type code 4)
+
+IF N_ELEMENTS(excludeCloudPixels) GT 0 THEN BEGIN
+  grayVal = 0.5    ; float gray; use 0.0 for black, or 128B for byte types
+
+  FOR b=0, 2 DO BEGIN
+    band = cmvData[*,*,b]
+    band[excludeCloudPixels] = grayVal
+    cmvData[*,*,b] = band
+  ENDFOR
+ENDIF
+
+; --- Persist changes back to the raster (or create a new one) ---
+;CATCH, err
+;IF err EQ 0 THEN BEGIN
+;  cloudy_CMVRaster.SetData, cmvData
+;ENDIF ELSE BEGIN
+;  CATCH, /CANCEL
+;  env = ENVI()
+;  newURI = 'cloudy_cmv_gray.tif'
+;  newRaster = env.CreateRaster(cmvData, URI=newURI, NB=3, DATA_TYPE=4, $   ; 4 = float
+;    SPATIALREF=cloudy_CMVRaster.SPATIALREF)
+;ENDELSE
+
+
+
+
+    cmvFile = file_basename(oDNB_RasterCollection[rr].URI)
+    cmvFile = cmvFile.replace('REPROJ', 'CMV')
     cmvFile = filepath(root=output_folder, cmvFile)
-    cloudy_CMVRaster.Export, cmvfile, 'ENVI'
-    cloudy_CMVRaster = ENVIURLRaster(cmvFile)
     
-    ;cmvFile = filepath(root=output_folder,'CMV_'+file_basename(tempURI))
-    ;cloudy_CMVRaster.Export, cmvFile, 'ENVI'
-
-    ;oCMVRasterCollection.Add, e.OpenRaster(cmvFile)
-    oCMVRasterCollection.Add, cloudy_CMVRaster
-
-    ;cldFile = filepath(root=output_folder,'CLD_'+file_basename(tempURI))
-    ;oCloudRaster.Export, cldFile, 'ENVI'
-
-    ;oLocalCldMaskCollection.Add, e.OpenRaster(cldFile)
+    CMVRaster=e.CreateRaster(cmvFile, cmvData, INHERITS_FROM=cloudy_CMVRaster)
+    CMVRaster.Save
+    
+    oCMVRasterCollection.Add, CMVRaster
+    
+    ; Save CloudMask to local directory
+    oCloudRaster = oCloudMaskCollection[rr]
+    cldFile = file_basename(oCloudRaster.URI)
+    cldFile = filepath(root=output_folder, cldFile)
     oLocalCldMaskCollection.Add, oCloudRaster
 
   endfor
 
-  ;STOP
+  STOP
 
   ; Output the series files and the CMV images to a local directory, not temporary
   ;OUTPUT_URI = output_cmvseries, $     ;output filename for CMV raster series
@@ -249,7 +327,7 @@ PRO NightLights_2CMV_ChangeDetection, $
     oDataColl.Add, oCloudMaskSeries
   endif
 
-  ;STOP
+  STOP
 
   return
 END
